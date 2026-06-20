@@ -9,7 +9,6 @@ jobs:
   release:
     permissions:
       contents: write
-      pull-requests: write
       id-token: write
     runs-on: ubuntu-latest
     steps:
@@ -17,24 +16,18 @@ jobs:
         id: semver
         run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
 
-      - uses: flatt-security/setup-takumi-guard-npm@v1
+      - uses: flatt-security/setup-takumi-guard-npm@9a5d797c2085b6326d3a2985c08e3a114b9b88c1 # v1.1.1
         with:
           bot-id: "BT01KPGC0DQQM4GSQJXHGAJ7C87G"
-
-      - name: Configure Git
-        run: |
-          git config user.name 'GitHub Action'
-          git config user.email 'action@github.com'
 
       - name: Update package version
         run: npm version ${{ steps.semver.outputs.version }} --no-git-tag-version
@@ -51,20 +44,8 @@ jobs:
       - name: Publish to npm
         run: npm publish --provenance --access public --registry https://registry.npmjs.org
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          title: "Update package version to ${{ steps.semver.outputs.version }}"
-          body: "Automated PR to update package version"
-          branch: "update-version-${{ steps.semver.outputs.version }}"
-          base: "main"
-          commit-message: "chore: Update package version to ${{ steps.semver.outputs.version }}"
-          add-paths: |
-            package.json
-            package-lock.json
-
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         with:
           tag_name: v${{ steps.semver.outputs.version }}
           name: Release v${{ steps.semver.outputs.version }}
